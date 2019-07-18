@@ -159,6 +159,9 @@ describe('connectionsDucks Epics', () => {
           }
         },
         allConnectionIds: [CONNECTION_ID]
+      },
+      settings: {
+        connectionTimeout: 1000
       }
     })
   })
@@ -260,6 +263,9 @@ describe('startupConnectEpic', () => {
           }
         },
         allConnectionIds: [CONNECTION_ID]
+      },
+      settings: {
+        connectionTimeout: 1000
       }
     })
   })

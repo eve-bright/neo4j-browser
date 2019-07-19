@@ -5,7 +5,7 @@ Object {
   "autoComplete": true,
   "browserSyncDebugServer": null,
   "cmdchar": ":",
-  "connectionTimeout": 5000,
+  "connectionTimeout": 10000,
   "editorAutocomplete": true,
   "editorLint": false,
   "enableMultiStatementMode": false,

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { APP_START, USER_CLEAR, CLOUD } from 'shared/modules/app/appDuck'
+import { APP_START, USER_CLEAR } from 'shared/modules/app/appDuck'
 
 export const NAME = 'settings'
 export const UPDATE = 'settings/UPDATE'
@@ -90,15 +90,14 @@ const initialState = {
   editorLint: false,
   useCypherThread: true,
   enableMultiStatementMode: false,
-  connectionTimeout: 5000
+  connectionTimeout: 10000
 }
 
 export default function settings (state = initialState, action) {
   if (action.type === APP_START) {
     state = {
       ...initialState,
-      ...state,
-      connectionTimeout: action.env === CLOUD ? 30000 : 5000
+      ...state
     }
   }
 

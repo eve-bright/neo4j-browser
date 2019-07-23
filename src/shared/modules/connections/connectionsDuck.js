@@ -31,7 +31,9 @@ import {
   getInitCmd,
   getSettings,
   getCmdChar,
-  getConnectionTimeout
+  getConnectionTimeout,
+  update as settingsUpdate,
+  NEO4J_CLOUD_DOMAINS
 } from 'shared/modules/settings/settingsDuck'
 import { inWebEnv, USER_CLEAR, APP_START } from 'shared/modules/app/appDuck'
 
@@ -180,6 +182,19 @@ const updateAuthEnabledHelper = (state, authEnabled) => {
   return Object.assign({}, state, { connectionsById: updatedConnectionByIds })
 }
 
+const connectionTimeoutHelper = (state, host) => {
+  const userDefinedConnectionTimeout = getConnectionTimeout(state)
+  if (userDefinedConnectionTimeout) {
+    return userDefinedConnectionTimeout
+  }
+  for (const cloudDomain of NEO4J_CLOUD_DOMAINS) {
+    if (host.endsWith(cloudDomain)) {
+      return 30000
+    }
+  }
+  return 5000
+}
+
 // Local vars
 let memoryUsername = ''
 let memoryPassword = ''
@@ -292,8 +307,12 @@ export const connectEpic = (action$, store) => {
     memoryPassword = ''
     return bolt
       .openConnection(action, {
-        encrypted: getEncryptionMode(action)
-        // connectionTimeout: getConnectionTimeout(store.getState())
+        encrypted: getEncryptionMode(action),
+        connectionTimeout: connectionTimeoutHelper(
+          store.getState(),
+          action.host,
+          store
+        )
       })
       .then(res => ({ type: action.$$responseChannel, success: true }))
       .catch(e => ({
@@ -321,7 +340,11 @@ export const startupConnectEpic = (action$, store) => {
           {
             withoutCredentials: true,
             encrypted: getEncryptionMode(connection),
-            connectionTimeout: getConnectionTimeout(store.getState())
+            connectionTimeout: connectionTimeoutHelper(
+              store.getState(),
+              connection.host,
+              store
+            )
           },
           onLostConnection(store.dispatch)
         )
@@ -352,7 +375,11 @@ export const startupConnectEpic = (action$, store) => {
               connection,
               {
                 encrypted: getEncryptionMode(connection),
-                connectionTimeout: getConnectionTimeout(store.getState())
+                connectionTimeout: connectionTimeoutHelper(
+                  store.getState(),
+                  connection.host,
+                  store
+                )
               },
               onLostConnection(store.dispatch)
             ) // Try with stored creds
@@ -454,7 +481,10 @@ export const connectionLostEpic = (action$, store) =>
                   connection,
                   {
                     encrypted: getEncryptionMode(connection),
-                    connectionTimeout: getConnectionTimeout(store.getState())
+                    connectionTimeout: connectionTimeoutHelper(
+                      store.getState(),
+                      connection.host.store
+                    )
                   },
                   e =>
                     setTimeout(
